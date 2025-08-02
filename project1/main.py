@@ -7,43 +7,39 @@ from dotenv import load_dotenv
 load_dotenv()
 
 @tool
-def calculator(a: float, b: float) -> str:
-    """Useful for performing basic arithmetic calculations with numbers."""
+def calculator(a: float, b:float) ->str:
+    """usefull for perofroming baisc arithmetic calculation with number"""
+    print("here is the calculator") 
     return f"The sum of {a} and {b} is {a + b}"
 
 @tool
-def say_hello(name: str) -> str:
-    """Useful for greeting a user."""
-    print("Tool 'say_hello' has been called.")
-    return f"Hello {name}, nice to meet you! ❤️"
+def say_hello(name:str)->str:
+    #useful for greeting a user
+    print("tool has been called")
+    return f"hello {name}, Nice to meet you <3"
+
 
 def main():
     model = ChatOpenAI(temperature=0)
 
-    tool_list = [calculator, say_hello]
-    agent_executor = create_react_agent(model, tool_list)
+    tools=[calculator, say_hello]
+    agent_executor = create_react_agent(model, tools)
 
-    print("Welcome! I'm your AI Assistant. Type 'quit' to exit.")
-    print("You can ask me to perform calculations or chat with me.")
+    print("Welcome! I'm your AI Assistant. Type 'quit to exit.")
+    print("You can ask me to perfrom calculation or caht with me.")
 
     while True:
         user_input = input("\nYOU: ").strip()
-        if user_input.lower() == "quit":
+        if user_input=="quit":
             break
-
-        print("\nAssistant: ", end="")
-        try:
-            response = agent_executor.invoke(
-                {"messages": [HumanMessage(content=user_input)]}
-            )
-            if "agent" in response and "messages" in response["agent"]:
-                for message in response["agent"]["messages"]:
-                    print(message.content, end="")
-            else:
-                print("Sorry, I didn't understand that.")
-        except Exception as e:
-            print(f"Error: {e}")
+        print("\nAssistant: ",end="")
+        for chunk in agent_executor.stream(
+            {"messages":[HumanMessage(content=user_input)]}):
+            if "agent" in chunk and "messages" in chunk["agent"]:
+                for message in chunk["agent"]["messages"]:
+                    print(message.content,end="")
         print()
 
 if __name__ == "__main__":
     main()
+           
